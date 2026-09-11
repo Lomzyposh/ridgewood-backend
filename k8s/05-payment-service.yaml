@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: ridgewood-payment-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8087
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/payment_db
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: POSTGRES_USER
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: POSTGRES_PASSWORD
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: JWT_SECRET
+
+            - name: PAYSTACK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: PAYSTACK_SECRET_KEY
+
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xms64m -Xmx320m"
+
+            - name: SERVER_PORT
+              value: "8087"
+
+            - name: COACH_SUBSCRIPTION_AMOUNT_KOBO
+              value: "1000000"
+
+            - name: PAYMENT_CALLBACK_URL
+              value: "http://localhost:5173/coach/dashboard?payment=callback"
+
+            - name: PAYSTACK_BASE_URL
+              value: "https://api.paystack.co"
+
+          readinessProbe:
+            tcpSocket:
+              port: 8087
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 30
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "448Mi"
+              cpu: "750m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 8087
+      targetPort: 8087
+  type: ClusterIP

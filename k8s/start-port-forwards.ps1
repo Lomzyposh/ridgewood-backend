@@ -1,0 +1,5 @@
+Start-Process powershell -ArgumentList '-NoExit','-Command','kubectl port-forward service/user-service 8081:8081'
+Start-Process powershell -ArgumentList '-NoExit','-Command','kubectl port-forward service/team-service 8082:8082'
+Start-Process powershell -ArgumentList '-NoExit','-Command','kubectl port-forward service/session-service 8084:8084'
+Start-Process powershell -ArgumentList '-NoExit','-Command','kubectl port-forward service/payment-service 8087:8087'
+Start-Process powershell -ArgumentList '-NoExit','-Command','kubectl port-forward service/facility-service 8088:8088'

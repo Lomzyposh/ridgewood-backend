@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ridgewood-postgres-init
+data:
+  init-databases.sql: |
+    CREATE DATABASE sports_user_db;
+    CREATE DATABASE team_db;
+    CREATE DATABASE session_db;
+    CREATE DATABASE payment_db;
+    CREATE DATABASE facility_db;
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ridgewood-secrets
+type: Opaque
+stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: "12345"
+  JWT_SECRET: ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890
+  SESSION_JWT_SECRET: VGhpc0lzQURldmVsb3BtZW50U2VjcmV0S2V5VGhhdE11c3RCZVJlcGxhY2VkMTIzNDU2Nzg5MA==
+  PAYSTACK_SECRET_KEY: sk_test_fa444abafcb441036c32dfc1f409e76ea15b4126

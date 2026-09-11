@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: facility-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: facility-service
+  template:
+    metadata:
+      labels:
+        app: facility-service
+    spec:
+      containers:
+        - name: facility-service
+          image: ridgewood-facility-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8088
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/facility_db
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: POSTGRES_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ridgewood-secrets
+                  key: JWT_SECRET
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xms64m -Xmx320m"
+          readinessProbe:
+            tcpSocket:
+              port: 8088
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "448Mi"
+              cpu: "750m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: facility-service
+spec:
+  selector:
+    app: facility-service
+  ports:
+    - port: 8088
+      targetPort: 8088
+  type: ClusterIP

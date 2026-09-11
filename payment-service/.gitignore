@@ -2,3 +2,6 @@ target/
 .env
 .idea/
 .vscode/
+k8s/00-config.yaml
+.env
+*.env
