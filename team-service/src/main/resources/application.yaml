@@ -1,14 +1,16 @@
 server:
-  port: 8082
+  port: ${PORT:8082}
 
 spring:
   application:
     name: team-service
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/team_db
-    username: postgres
-    password: 12345
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/team_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,18 +18,19 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
   cloud:
     config:
       enabled: false
 
 jwt:
-  secret: ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890
+  secret: ${JWT_SECRET:ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890}
 
 eureka:
   client:
     enabled: false
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
   instance:
     prefer-ip-address: true
-
