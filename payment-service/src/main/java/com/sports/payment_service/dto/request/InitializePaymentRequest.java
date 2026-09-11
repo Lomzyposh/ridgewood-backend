@@ -1,0 +1,1 @@
+package com.sports.payment_service.dto.request; public record InitializePaymentRequest(String callbackUrl) {}

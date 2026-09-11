@@ -1,0 +1,1 @@
+package com.sports.payment_service.dto.response; import com.sports.payment_service.entity.PaymentStatus; import java.time.LocalDateTime; public record PaymentResponse(Long id,Long coachId,String email,Long amount,String reference,PaymentStatus status,String authorizationUrl,LocalDateTime createdAt,LocalDateTime paidAt) {}

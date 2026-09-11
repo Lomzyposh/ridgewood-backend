@@ -1,0 +1,14 @@
+Added real team-bookings endpoint:
+
+GET /api/bookings/team/{teamId}
+Roles: COACH, ADMIN
+
+Example:
+GET /api/bookings/team/2
+
+Returns that team's bookings ordered by date then start time.
+
+Files changed:
+- controller/BookingController.java
+- service/BookingService.java
+- repository/BookingRepository.java

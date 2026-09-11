@@ -1,0 +1,1 @@
+package com.sports.payment_service.dto.response; import java.time.LocalDateTime; public record SubscriptionStatusResponse(Long coachId,String status,String latestPaymentReference,Long amount,LocalDateTime paidAt,boolean active) {}

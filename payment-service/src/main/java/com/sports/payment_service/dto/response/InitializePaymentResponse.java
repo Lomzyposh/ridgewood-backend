@@ -1,0 +1,1 @@
+package com.sports.payment_service.dto.response; import com.sports.payment_service.entity.PaymentStatus; public record InitializePaymentResponse(Long paymentId,String reference,Long amount,PaymentStatus status,String authorizationUrl,String accessCode) {}

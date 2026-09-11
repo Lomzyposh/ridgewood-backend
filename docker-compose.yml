@@ -1,0 +1,100 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: ridgewood-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "12345"
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - ridgewood_postgres_data:/var/lib/postgresql/data
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  user-service:
+    image: ridgewood-user-service:latest
+    container_name: ridgewood-user-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sports_user_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "12345"
+      JWT_SECRET: ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890
+    ports:
+      - "8081:8081"
+
+  team-service:
+    image: ridgewood-team-service:latest
+    container_name: ridgewood-team-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/team_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "12345"
+      JWT_SECRET: ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890
+    ports:
+      - "8082:8082"
+
+  session-service:
+    image: ridgewood-session-service:latest
+    container_name: ridgewood-session-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/session_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "12345"
+      JWT_SECRET: VGhpc0lzQURldmVsb3BtZW50U2VjcmV0S2V5VGhhdE11c3RCZVJlcGxhY2VkMTIzNDU2Nzg5MA==
+    ports:
+      - "8084:8084"
+
+  payment-service:
+    image: ridgewood-payment-service:latest
+    container_name: ridgewood-payment-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/payment_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: "12345"
+      JWT_SECRET: ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890
+      COACH_SUBSCRIPTION_AMOUNT_KOBO: "1000000"
+      PAYMENT_CALLBACK_URL: http://localhost:5173/coach/dashboard?payment=callback
+      PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}
+    ports:
+      - "8087:8087"
+
+  facility-service:
+    image: ridgewood-facility-service:latest
+    container_name: ridgewood-facility-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/facility_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: "12345"
+      JWT_SECRET: ThisIsADevelopmentSecretKeyThatMustBeReplaced1234567890
+    ports:
+      - "8088:8088"
+
+volumes:
+  ridgewood_postgres_data:

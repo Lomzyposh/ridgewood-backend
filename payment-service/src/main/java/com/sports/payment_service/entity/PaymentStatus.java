@@ -1,0 +1,1 @@
+package com.sports.payment_service.entity; public enum PaymentStatus { PENDING, SUCCESS, FAILED }

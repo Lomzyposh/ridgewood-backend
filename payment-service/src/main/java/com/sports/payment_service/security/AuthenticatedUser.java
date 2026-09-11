@@ -1,0 +1,1 @@
+package com.sports.payment_service.security; public record AuthenticatedUser(Long userId,String email,String role) {}
