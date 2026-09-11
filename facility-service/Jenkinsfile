@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    options { timestamps() }
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+        stage('Test') {
+            steps {
+                dir('facility-service') {
+                    bat 'mvn clean test'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                dir('facility-service') {
+                    bat 'mvn package -DskipTests'
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir('facility-service') {
+                    bat 'docker build -t ridgewood-facility-service:latest .'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            junit testResults: 'facility-service/target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'facility-service/target/*.jar', fingerprint: true, allowEmptyArchive: true
+        }
+        success { echo 'facility-service pipeline completed successfully.' }
+        failure { echo 'facility-service pipeline failed. Check Console Output.' }
+    }
+}

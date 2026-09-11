@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    options { timestamps() }
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+        stage('Test') {
+            steps {
+                dir('payment-service') {
+                    bat 'mvn clean test'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                dir('payment-service') {
+                    bat 'mvn package -DskipTests'
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir('payment-service') {
+                    bat 'docker build -t ridgewood-payment-service:latest .'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            junit testResults: 'payment-service/target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'payment-service/target/*.jar', fingerprint: true, allowEmptyArchive: true
+        }
+        success { echo 'payment-service pipeline completed successfully.' }
+        failure { echo 'payment-service pipeline failed. Check Console Output.' }
+    }
+}

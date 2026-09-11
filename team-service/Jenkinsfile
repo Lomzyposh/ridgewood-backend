@@ -1,48 +1,38 @@
 pipeline {
     agent any
-
-    options {
-        timestamps()
-    }
-
+    options { timestamps() }
     stages {
         stage('Checkout') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
-
         stage('Test') {
             steps {
-                bat 'mvn clean test'
+                dir('team-service') {
+                    bat 'mvn clean test'
+                }
             }
         }
-
         stage('Package') {
             steps {
-                bat 'mvn package -DskipTests'
+                dir('team-service') {
+                    bat 'mvn package -DskipTests'
+                }
             }
         }
-
         stage('Docker Build') {
             steps {
-                bat 'docker build -t ridgewood-team-service:latest .'
+                dir('team-service') {
+                    bat 'docker build -t ridgewood-team-service:latest .'
+                }
             }
         }
     }
-
     post {
-        success {
-            echo 'team-service pipeline completed successfully.'
-        }
-
-        failure {
-            echo 'team-service pipeline failed. Check the stage above for the error.'
-        }
-
         always {
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
-            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+            junit testResults: 'team-service/target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'team-service/target/*.jar', fingerprint: true, allowEmptyArchive: true
         }
+        success { echo 'team-service pipeline completed successfully.' }
+        failure { echo 'team-service pipeline failed. Check Console Output.' }
     }
 }

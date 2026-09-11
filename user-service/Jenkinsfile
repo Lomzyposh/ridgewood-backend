@@ -1,48 +1,38 @@
 pipeline {
     agent any
-
-    options {
-        timestamps()
-    }
-
+    options { timestamps() }
     stages {
         stage('Checkout') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
-
         stage('Test') {
             steps {
-                bat 'mvn clean test'
+                dir('user-service') {
+                    bat 'mvn clean test'
+                }
             }
         }
-
         stage('Package') {
             steps {
-                bat 'mvn package -DskipTests'
+                dir('user-service') {
+                    bat 'mvn package -DskipTests'
+                }
             }
         }
-
         stage('Docker Build') {
             steps {
-                bat 'docker build -t ridgewood-user-service:latest .'
+                dir('user-service') {
+                    bat 'docker build -t ridgewood-user-service:latest .'
+                }
             }
         }
     }
-
     post {
-        success {
-            echo 'user-service pipeline completed successfully.'
-        }
-
-        failure {
-            echo 'user-service pipeline failed. Check the stage above for the error.'
-        }
-
         always {
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: true
-            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+            junit testResults: 'user-service/target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'user-service/target/*.jar', fingerprint: true, allowEmptyArchive: true
         }
+        success { echo 'user-service pipeline completed successfully.' }
+        failure { echo 'user-service pipeline failed. Check Console Output.' }
     }
 }
